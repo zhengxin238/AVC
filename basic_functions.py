@@ -102,6 +102,8 @@ def committee_bordascore_df_func(voters, bordascore_df_original, list_candidates
 print(committee_bordascore_df_func(voters, df_step1, list_candidates))
 
 
+
+
 # ===============================================================================================================
 # below are not yet correct
 # ===============================================================================================================
