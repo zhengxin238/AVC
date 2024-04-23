@@ -67,7 +67,9 @@ def borda_score_altristic_func(friend_structure_list, borda_score_df, p):
         n += 1
     return altruistic_df
 
-l = borda_score_altristic_func(friend_structure_list, df_step1, 0.5)
+p=0.5
+l = borda_score_altristic_func(friend_structure_list, df_step1, p)
+
 
 def get_top_x_candidates(committee_size, borda_score_altristic_df):
     column_sums = borda_score_altristic_df.sum()
@@ -77,7 +79,7 @@ def get_top_x_candidates(committee_size, borda_score_altristic_df):
     return top_candidates
 
 
-list_candidates = get_top_x_candidates(4,l)
+list_candidates = get_top_x_candidates(4, l)
 
 # ===============================================================================================================
 # above is to find a committee elected
@@ -88,10 +90,11 @@ print(list_candidates)
 
 
 # ===============================================================================================================
-# with a committee elected, in the following part we calculate the nine values of measuring methods
+# with a committee elected, in the following part we calculate the nine values of measuring methods, the first step is to calculate the barda score each voter give to this winning committee
 # ===============================================================================================================
 def committee_bordascore_df_func(voters, bordascore_df_original, list_candidates):
-    committee_bordascore_df = pd.DataFrame(index=bordascore_df_original.index)  # Create empty DataFrame for committee Borda scores
+    committee_bordascore_df = pd.DataFrame(
+        index=bordascore_df_original.index)  # Create empty DataFrame for committee Borda scores
 
     for voter in voters:
         score_temp = df_step1.loc[voter, list_candidates].sum()  # Calculate Borda score for the committee
@@ -99,27 +102,122 @@ def committee_bordascore_df_func(voters, bordascore_df_original, list_candidates
 
     return committee_bordascore_df
 
-print(committee_bordascore_df_func(voters, df_step1, list_candidates))
 
-
+cbd = committee_bordascore_df_func(voters, df_step1, list_candidates)
+print(cbd)
 
 
 # ===============================================================================================================
-# below are not yet correct
 # ===============================================================================================================
 # ===============================================================================================================
 # ===============================================================================================================
-
-def avg_fsi_df_func(list_candidates, voters_f4, committee_bordascore_df, friend_structure):
-    avg_fsi_df = pd.DataFrame(columns="avg", index=voters_f4)
-    for friends in friend_structure:
+# above is the fwith the barda score df each voter give to this winning committee we calculte with the following 3 function the avg, min, max as the prepare for finding the nine values e.g. avg-avg, avg-min...
+# ===============================================================================================================
+def avg_fsi_df_func(voters_f4, committee_bordascore_df, friend_structure):
+    avg_fsi_df = pd.DataFrame(columns=["avg"], index=voters_f4)
+    for index, friends in enumerate(friend_structure):
         temp_score = 0
         for f in friends:
-            temp_score += committee_bordascore_df.at[int(f), "Committee Borda Score"]
-            avg_fsi_df.at[list_candidates, "Committee Borda Score"] = temp_score / len(friends)
+            temp_score += committee_bordascore_df.at[f, "Committee Borda Score"]
+        avg_fsi_df.at[voters_f4[index], "avg"] = temp_score / len(friends)
     return avg_fsi_df
 
 
+avgdf = avg_fsi_df_func(voters, cbd, friend_structure_list)
+
+print(avgdf)
+
+def min_fsi_df_func(voters_f5, committee_bordascore_df, friend_structure):
+    min_fsi_df = pd.DataFrame(columns=["min"], index=voters_f5)
+    for index, friends in enumerate(friend_structure):
+        temp_score = 0
+        for f in friends:
+            if (temp_score == 0) or (committee_bordascore_df.at[f, "Committee Borda Score"] <= temp_score):
+               temp_score = committee_bordascore_df.at[f, "Committee Borda Score"]
+            min_fsi_df.at[voters_f5[index], "min"] = temp_score
+    return min_fsi_df
+
+
+mindf = min_fsi_df_func(voters, cbd, friend_structure_list)
+print(mindf)
+
+
+def max_fsi_df_func(voters_f6, committee_bordascore_df, friend_structure):
+    max_fsi_df = pd.DataFrame(columns=["max"], index=voters_f6)
+    for index, friends in enumerate(friend_structure):
+        temp_score = 0
+        for f in friends:
+            if (temp_score == 0) or (committee_bordascore_df.at[f, "Committee Borda Score"] >= temp_score):
+                temp_score = committee_bordascore_df.at[f, "Committee Borda Score"]
+            max_fsi_df.at[voters_f6[index], "max"] = temp_score
+    return max_fsi_df
+
+maxdf = max_fsi_df_func(voters, cbd, friend_structure_list)
+print(maxdf)
+
+
+
+
+
+
+
+
+
+def getfinaldf(indexname,avgdf, mindf, maxdf):
+
+    avgavgdf = avgdf.mean()
+    minavgdf = avgdf.min()
+    maxavgdf = avgdf.max()
+
+    avgmindf = mindf.mean()
+    minmindf = mindf.min()
+    maxmindf = mindf.max()
+
+    avgmaxdf = maxdf.mean()
+    minmaxdf = maxdf.min()
+    maxmaxdf = maxdf.max()
+
+    resultdf = pd.DataFrame(columns=["result"])
+
+    resultdf ["result"] = resultdf["result"]._append(avgavgdf, ignore_index=True)._append(maxavgdf, ignore_index=True)._append(minavgdf,
+                                                                                                       ignore_index=True)._append(
+        maxmaxdf, ignore_index=True)._append(minmindf, ignore_index=True)._append(maxmindf,
+                                                                                  ignore_index=True)._append(minmaxdf,
+                                                                                                             ignore_index=True)._append(
+        avgmindf, ignore_index=True)._append(avgmaxdf,
+                                             ignore_index=True)
+
+    resultdf.index = indexname
+
+    return resultdf
+
+
+n_list = ["avg_avg", "max_avg", "min_avg", "max_max", "min_min","max_min","min_max","avg_min","avg_max"]
+
+finaldf = getfinaldf(n_list,avgdf, mindf, maxdf)
+
+print(finaldf)
+
+
+
+
+def get_committee_dict(final_committee,candidates):
+    indexed_strings = [f"x[{i}]" for i in range(len(candidates))]
+    index_list = []
+    for i in final_committee:
+        index_of_element = candidates.index(i)
+        index_list.append(index_of_element)
+    index_list = sorted(index_list)
+    result_dict = {key: 1 if key in [f"x[{idx}]" for idx in index_list] else 0 for key in indexed_strings}
+    return result_dict
+
+
+dictcandidates = get_committee_dict(list_candidates,candidates)
+print(dictcandidates)
+
+
+
+
 # ===============================================================================================================
 # below are not yet correct
 # ===============================================================================================================
@@ -128,38 +226,39 @@ def avg_fsi_df_func(list_candidates, voters_f4, committee_bordascore_df, friend_
 
 
 
-def min_fsi_df_func(subsets_f5, voters_f5, committee_bordascore_df_f5, friend_structure):
-    min_fsi_df = pd.DataFrame(columns=list(range(0, len(subsets_f5))), index=voters_f5)
-    for i in range(0, len(subsets_f5)):
-        m = 0
-        for friends in friend_structure:
-            temp = None
-            for friend in friends:
-                if (temp == None) or (temp >= committee_bordascore_df_f5.at[int(friend), i]):
-                    temp = committee_bordascore_df_f5.at[int(friend), i]
-            min_fsi_df.at[voters_f5[m], i] = temp
-            m += 1
-    return min_fsi_df
+# optimal_solution_dict = {}
+# optimal_solution_dict["final_committee"] = dictcandidates
+# optimal_solution_dict["optimized_value"] = finaldf.iloc["avg_avg","result"]
+#
+# result_list_dict_temp = {}
+# result_list_dict_temp[str((p))] = {}
+def get_result_dict(dictcandidates,n_list,finaldf):
+    result_list_dict_temp = {}
+    number_method = 0
+    for name_method in n_list:
+        optimal_solution_dict = {}
+        optimal_solution_dict["final_committee"] = dictcandidates
+        optimal_solution_dict["optimized_value"] = finaldf.iloc[number_method,0]
+        result_list_dict_temp[str(p)]= {}
+        result_list_dict_temp[str(p)][name_method] = {}
+        result_list_dict_temp[str(p)][name_method] = optimal_solution_dict
+        number_method+=1
 
 
+print(get_result_dict(dictcandidates,n_list,finaldf))
+# max_optimal_solution = optimal_solutions[max_optimal_index]
+# max_optimal_solution_formatted = {f'x[{k}]': v for k, v in max_optimal_solution.items()}
+# # max_optimal_objective = corresponding_objectives[max_optimal_index]
+# optimal_solution_dict["final_committee"] = max_optimal_solution_formatted
+# optimal_solution_dict["optimized_value"] = max(optimal_values)
 
-
-
-
-
-def max_fsi_df_func(subsets_f6, voters_f6, committee_bordascore_df_f6, friend_structure):
-    max_fsi_df = pd.DataFrame(columns=list(range(0, len(subsets_f6))), index=voters_f6)
-    for i in range(0, len(subsets_f6)):
-        m = 0
-        for friends in friend_structure:
-            temp = None
-            for friend in friends:
-                if (temp == None) or (temp <= committee_bordascore_df_f6.at[int(friend), i]):
-                    temp = committee_bordascore_df_f6.at[int(friend), i]
-            max_fsi_df.at[voters_f6[m], i] = temp
-            m += 1
-    return max_fsi_df
-
-
-
-
+# result_list_dict_temp[str((p))] = {}
+#             result_list_dict_temp[str((p))]["avg_avg"] = result_dict_avg_avg
+#             result_list_dict_temp[str((p))]["max_avg"] = result_dict_max_avg
+#             result_list_dict_temp[str((p))]["min_avg"] = result_dict_min_avg
+#             result_list_dict_temp[str((p))]["max_max"] = result_dict_max_max
+#             result_list_dict_temp[str((p))]["min_min"] = result_dict_min_min
+#             result_list_dict_temp[str((p))]["max_min"] = result_dict_max_min
+#             result_list_dict_temp[str((p))]["min_max"] = result_dict_min_max
+#             result_list_dict_temp[str((p))]["avg_min"] = result_dict_avg_min
+#             result_list_dict_temp[str((p))]["avg_max"] = result_dict_avg_max
