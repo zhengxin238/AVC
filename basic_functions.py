@@ -3,31 +3,31 @@ from gurobipy import *
 import graphCode
 import prefLibParse
 
-# pd.set_option('display.max_columns', None)
+pd.set_option('display.max_columns', None)
 
-# # =====================================================
-# # the input information
-#
-# candidates = ['candidate_a', 'candidate_b', 'candidate_c', 'candidate_d', 'candidate_e', 'candidate_f']
-# voters = ['v1', 'v2', 'v3', 'v4', 'v5', 'v6']
-#
-# preferences_v1 = [candidates[0], candidates[1], candidates[2], candidates[3], candidates[4], candidates[5]]
-# preferences_v2 = [candidates[1], candidates[3], candidates[4], candidates[2], candidates[5], candidates[0]]
-# preferences_v3 = [candidates[5], candidates[4], candidates[1], candidates[0], candidates[3], candidates[2]]
-# preferences_v4 = [candidates[3], candidates[2], candidates[0], candidates[5], candidates[1], candidates[4]]
-# preferences_v5 = [candidates[2], candidates[0], candidates[5], candidates[4], candidates[3], candidates[1]]
-# preferences_v6 = [candidates[4], candidates[5], candidates[3], candidates[1], candidates[0], candidates[2]]
-#
-# preference_in_table = [preferences_v1, preferences_v2, preferences_v3, preferences_v4, preferences_v5, preferences_v6]
-#
-# friends_v1 = [voters[1], voters[4], voters[5]]
-# friends_v2 = [voters[0], voters[4], voters[5]]
-# friends_v3 = [voters[3], voters[4]]
-# friends_v4 = [voters[2]]
-# friends_v5 = [voters[0], voters[1], voters[2]]
-# friends_v6 = [voters[0], voters[1]]
-#
-# friend_structure_list = [friends_v1, friends_v2, friends_v3, friends_v4, friends_v5, friends_v6]
+# =====================================================
+# the input information
+
+candidates = ['candidate_a', 'candidate_b', 'candidate_c', 'candidate_d', 'candidate_e', 'candidate_f']
+voters = ['v1', 'v2', 'v3', 'v4', 'v5', 'v6']
+
+preferences_v1 = [candidates[0], candidates[1], candidates[2], candidates[3], candidates[4], candidates[5]]
+preferences_v2 = [candidates[1], candidates[3], candidates[4], candidates[2], candidates[5], candidates[0]]
+preferences_v3 = [candidates[5], candidates[4], candidates[1], candidates[0], candidates[3], candidates[2]]
+preferences_v4 = [candidates[3], candidates[2], candidates[0], candidates[5], candidates[1], candidates[4]]
+preferences_v5 = [candidates[2], candidates[0], candidates[5], candidates[4], candidates[3], candidates[1]]
+preferences_v6 = [candidates[4], candidates[5], candidates[3], candidates[1], candidates[0], candidates[2]]
+
+preference_in_table = [preferences_v1, preferences_v2, preferences_v3, preferences_v4, preferences_v5, preferences_v6]
+
+friends_v1 = [voters[1], voters[4], voters[5]]
+friends_v2 = [voters[0], voters[4], voters[5]]
+friends_v3 = [voters[3], voters[4]]
+friends_v4 = [voters[2]]
+friends_v5 = [voters[0], voters[1], voters[2]]
+friends_v6 = [voters[0], voters[1]]
+
+friend_structure_list = [friends_v1, friends_v2, friends_v3, friends_v4, friends_v5, friends_v6]
 
 
 # =====================================================f1
@@ -46,8 +46,8 @@ import prefLibParse
 # friend_structure_list = graphCode.getFriendStructureList(g)
 #
 # p = 0.5
-# committee_size = 4
-# n_list = ["avg_avg", "max_avg", "min_avg", "max_max", "min_min", "max_min", "min_max", "avg_min", "avg_max"]
+committee_size = 4
+n_list = ["avg_avg", "max_avg", "min_avg", "max_max", "min_min", "max_min", "min_max", "avg_min", "avg_max"]
 
 
 
@@ -68,9 +68,9 @@ def borda_score_df_func(candidates, voters, preference):
     return borda_score_df
 
 
-# df_step1 = borda_score_df_func(candidates, voters, preference_in_table)
-#
-#
+df_step1 = borda_score_df_func(candidates, voters, preference_in_table)
+
+
 # print(df_step1)
 # for index, voter in enumerate(voters):
 #     new_row_values = df_step1.iloc[index] * 0.5
@@ -80,7 +80,7 @@ def borda_score_altristic_func(friend_structure_list, borda_score_df, p):
     altruistic_df = pd.DataFrame()
     n = 0
     for index in range(len(borda_score_df)):
-        new_row_values = borda_score_df.iloc[index] * 0.5
+        new_row_values = borda_score_df.iloc[index] * p
 
         for index2, fv in enumerate(friend_structure_list[n]):
             new_row_values += (borda_score_df.iloc[index2] * (1 - p)) / len(friend_structure_list[n])
@@ -89,10 +89,10 @@ def borda_score_altristic_func(friend_structure_list, borda_score_df, p):
         n += 1
     return altruistic_df
 
-# p=0.5
-# l = borda_score_altristic_func(friend_structure_list, df_step1, p)
-#
-# print(l)
+p=0.5
+l = borda_score_altristic_func(friend_structure_list, df_step1, p)
+
+print(l)
 
 
 def getCoefficientMatrix(altruistic_df):
@@ -100,8 +100,10 @@ def getCoefficientMatrix(altruistic_df):
     # Convert column sums to a NumPy array
     final_coeff_matrix = column_sums.values
     return final_coeff_matrix
+coeff = getCoefficientMatrix(l)
 
-def altristic_model_run_optimization(candidates,coeff_aa,committee_size_aa,voters_aa):
+
+def altristic_model_run_optimization(candidates,coeff_aa,committee_size_aa):
     m = Model("mlp")
     # Set the time limit (e.g., 300 seconds)
     m.Params.TimeLimit = 100
@@ -111,7 +113,7 @@ def altristic_model_run_optimization(candidates,coeff_aa,committee_size_aa,voter
     num_vars_aa = len(candidates)
     x_group1 = m.addVars(num_vars_aa, vtype=GRB.BINARY, name="x")
     objective_expression = quicksum(coeff_aa[i] * x_group1[i] for i in range(num_vars_aa))
-    obj = m.setObjective(objective_expression/len(voters_aa), GRB.MAXIMIZE)
+    m.setObjective(objective_expression, GRB.MAXIMIZE)
     m.addConstr(quicksum(x_group1[i] for i in range(num_vars_aa)) == committee_size_aa, "c2")
     m.optimize()
     if m.status == GRB.OPTIMAL:
@@ -120,18 +122,24 @@ def altristic_model_run_optimization(candidates,coeff_aa,committee_size_aa,voter
         for v in m.getVars():
             optimal_solution[v.varName] = v.x
         optimal_solution_dict["final_committee"] = optimal_solution
-        optimal_solution_dict["optimized_value"] = m.objVal
         print(optimal_solution_dict)
-        return optimal_solution_dict
+        selected_candidates_list = [candidates[int(key.split('[')[1].split(']')[0])]
+                                    for key, value in optimal_solution_dict['final_committee'].items()
+                                    if value == 1.0]
+        return selected_candidates_list
     else:
         optimal_solution_dict = {}
         optimal_solution = {}
         for v in m.getVars():
             optimal_solution[v.varName] = v.x
         optimal_solution_dict["final_committee"] = optimal_solution
-        optimal_solution_dict["optimized_value"] = m.objVal
         print(optimal_solution_dict)
-        return optimal_solution_dict
+        selected_candidates_list = [candidates[int(key.split('[')[1].split(']')[0])]
+                                    for key, value in optimal_solution_dict['final_committee'].items()
+                                    if value == 1.0]
+        return selected_candidates_list
+
+print(altristic_model_run_optimization(candidates,coeff,committee_size,voters))
 
 def get_top_x_candidates(committee_size, borda_score_altristic_df):
     column_sums = borda_score_altristic_df.sum()
@@ -141,14 +149,14 @@ def get_top_x_candidates(committee_size, borda_score_altristic_df):
     return top_candidates
 
 
-# list_candidates = get_top_x_candidates(4, l)
+list_candidates = get_top_x_candidates(4, l)
 
 # ===============================================================================================================
 # above is to find a committee elected
 # ===============================================================================================================
 
 
-# print(list_candidates)
+print(list_candidates)
 
 
 # ===============================================================================================================
