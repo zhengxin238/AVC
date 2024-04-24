@@ -1,9 +1,7 @@
 import uuid
 import random
-import pandas as pd
 import networkx as nx
 import numpy as np
-from pymongo import MongoClient
 import basic_functions
 import graphCode
 import prefLibParse
@@ -117,7 +115,7 @@ import prefLibParse
 #                                                                          committee_size)
 def get_finaldf_integrated(candidates, voters, preference_in_table,
                            n_list, friend_structure_list, dict_committee):
-    list_candidates = basic_functions.from_dict_to_list(candidates,dict_committee)
+    list_candidates = basic_functions.from_dict_to_list(candidates, dict_committee)
 
     cbd = basic_functions.committee_bordascore_df_func(voters, basic_functions.borda_score_df_func(candidates, voters,
                                                                                                    preference_in_table),
@@ -140,13 +138,13 @@ def get_finaldf_integrated(candidates, voters, preference_in_table,
 def get_one_entry_dict(candidates, voters, preference_in_table,n_list,friend_structure_list,p, committee_size):
 
     dictcandidates = basic_functions.altristic_model_run_optimization(candidates,
-                                                                         basic_functions.getCoefficientMatrix(
+                                                                      basic_functions.getCoefficientMatrix(
                                                                              basic_functions.borda_score_altristic_func(
                                                                                  friend_structure_list,
                                                                                  basic_functions.borda_score_df_func(
                                                                                      candidates, voters,
                                                                                      preference_in_table), p)),
-                                                                         committee_size)
+                                                                      committee_size)
 
     finaldf = get_finaldf_integrated(candidates, voters, preference_in_table,n_list, friend_structure_list, dictcandidates)
 
