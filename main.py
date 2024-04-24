@@ -1,16 +1,11 @@
-# This is a sample Python script.
+from pymongo import MongoClient
 
-# Press Umschalt+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Strg+F8 to toggle the breakpoint.
+import integrate_funcs
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+db = MongoClient('localhost', 27017)['Altruistic_result']
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+file_path = r"D:\TU Clausthal\Masterarbeit\AltristicVotingCode\soc_urls_1.txt"
+
+
+integrate_funcs.readURL_test_data(db, file_path)
