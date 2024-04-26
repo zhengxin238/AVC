@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import pymongo
 from itertools import combinations
@@ -7,7 +8,6 @@ pd.set_option('display.max_rows', None)  # Show all rows
 pd.set_option('display.max_columns', None)  # Show all columns
 pd.set_option('display.width', None)  # Auto-detect width
 
-
 list_methods = ["avg_avg", "max_avg", "min_avg", "max_max", "min_min", "max_min", "min_max", "avg_min", "avg_max"]
 cleint_name = "mongodb://localhost:27017/"
 db_name = "Altruistic_result"
@@ -15,9 +15,8 @@ collection_name = '00009-00000001_0.1'
 
 
 def get_similarity_inPercent(cleint_name, db_name, collection_name):
-
-
-    df = pd.DataFrame(columns = ["avg_avg", "max_avg", "min_avg", "max_max", "min_min", "max_min", "min_max", "avg_min", "avg_max"])
+    df = pd.DataFrame(
+        columns=["avg_avg", "max_avg", "min_avg", "max_max", "min_min", "max_min", "min_max", "avg_min", "avg_max"])
 
     # Establish a connection to MongoDB
     client = pymongo.MongoClient(cleint_name)
@@ -43,25 +42,29 @@ def get_similarity_inPercent(cleint_name, db_name, collection_name):
     for committee_size in documents_list:
         for key_1, value_1 in committee_size.items():
             for key_2, value_2 in value_1.items():
-                list_of_best_values =[]
+                list_of_best_values = []
                 for key_3, value_3 in value_2.items():
                     # print(key_3)
                     # print(value_3)
                     items = list(value_3.items())
                     list_of_best_values.append(items[1][1])
                     # best_value = items[1][0]
-    #                 list_best_value.append(best_value)
+                #                 list_best_value.append(best_value)
                 df.loc[len(df)] = list_of_best_values
     #
     print(df)
     return df
-df =get_similarity_inPercent(cleint_name, db_name, collection_name)
+
+
+df = get_similarity_inPercent(cleint_name, db_name, collection_name)
 print(len(df))
 
+
 def chunk_dataframe(df):
+    column_names = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     # Calculate the integer chunk size
     chunk_size = 10
-    num_chunks = len(df)//chunk_size
+    num_chunks = len(df) // chunk_size
 
     chunked_dfs = []  # List to store chunked DataFrames
 
@@ -76,10 +79,60 @@ def chunk_dataframe(df):
 
         # Slice the DataFrame to get the chunk
         chunk = df.iloc[start_idx:end_idx]
-        chunked_dfs.append(chunk)  # Append the chunk to the list of chunked DataFrames
+        transposed_df = chunk.transpose()
+        transposed_df.columns = column_names
+        chunked_dfs.append(transposed_df)  # Append the chunk to the list of chunked DataFrames
 
     return chunked_dfs
 
-list_of_chunked_fds=chunk_dataframe(df)
+list_of_chunked_fds = chunk_dataframe(df)
+
+
+dfs=[]
+
+df0 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+df1 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+df2 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+df3 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+df4 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+df5 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+df6 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+df7 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+df8 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+
+
+
+
+dfs=[df0,df1,df2,df3,df4,df5,df6,df7,df8]
+#
+
+
 for i in list_of_chunked_fds:
+    m = 0
+    for index, row in i.iterrows():
+
+        # dft = pd.DataFrame(row)
+        dfs[m] = dfs[m]._append(row, ignore_index=True)
+        m += 1
+
+for i in dfs:
+    print(i)
+
+def get_normalised_result(dfs):
+    normalised_dfs_list =[]
+    for i in dfs:
+
+        step_size = 100 / len(i)
+        i = i.copy()
+        i.loc[:, 'Nomalised_committe_size'] = np.arange(0, 100, step_size)[:len(i)]
+        i.set_index(i.iloc[:, -1], inplace=True)
+        # Drop the last column
+        i = i.iloc[:, :-1]
+        i.index.name = None
+        normalised_dfs_list.append(i)
+
+    return normalised_dfs_list
+normorlised_dfs= get_normalised_result(dfs)
+
+for i in normorlised_dfs:
     print(i)
