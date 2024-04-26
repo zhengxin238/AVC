@@ -12,6 +12,8 @@ pd.set_option('display.width', None)  # Auto-detect width
 cleint_name = "mongodb://localhost:27017/"
 db_name = "Altruistic_result"
 collection_name = '00009-00000001_0.1'
+def generate_rising_sums(n):
+    return [sum(range(n, n - i, -1)) for i in range(n, 0, -1)]
 
 
 def get_stepone_df(cleint_name, db_name, collection_name):
@@ -52,7 +54,7 @@ def get_stepone_df(cleint_name, db_name, collection_name):
 
     return df
 
-
+#
 # df = get_stepone_df(cleint_name, db_name, collection_name)
 # print(len(df))
 
@@ -119,10 +121,18 @@ def get_normalised_result(dfs):
         i.index.name = None
         normalised_dfs_list.append(i)
 
+    for i in normalised_dfs_list:
+        sum_list = sorted(generate_rising_sums(len(i)))
+
+        for index, divisor in enumerate(sum_list):
+            i.iloc[index] = i.iloc[index] / divisor
     return normalised_dfs_list
 
 
 # normorlised_dfs = get_normalised_result(dfs)
-
+#
 # for i in normorlised_dfs:
 #     print(i)
+
+
+
