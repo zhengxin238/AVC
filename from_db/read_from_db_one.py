@@ -8,13 +8,13 @@ pd.set_option('display.max_rows', None)  # Show all rows
 pd.set_option('display.max_columns', None)  # Show all columns
 pd.set_option('display.width', None)  # Auto-detect width
 
-list_methods = ["avg_avg", "max_avg", "min_avg", "max_max", "min_min", "max_min", "min_max", "avg_min", "avg_max"]
+# list_methods = ["avg_avg", "max_avg", "min_avg", "max_max", "min_min", "max_min", "min_max", "avg_min", "avg_max"]
 cleint_name = "mongodb://localhost:27017/"
 db_name = "Altruistic_result"
 collection_name = '00009-00000001_0.1'
 
 
-def get_similarity_inPercent(cleint_name, db_name, collection_name):
+def get_stepone_df(cleint_name, db_name, collection_name):
     df = pd.DataFrame(
         columns=["avg_avg", "max_avg", "min_avg", "max_max", "min_min", "max_min", "min_max", "avg_min", "avg_max"])
 
@@ -48,16 +48,13 @@ def get_similarity_inPercent(cleint_name, db_name, collection_name):
                     # print(value_3)
                     items = list(value_3.items())
                     list_of_best_values.append(items[1][1])
-                    # best_value = items[1][0]
-                #                 list_best_value.append(best_value)
                 df.loc[len(df)] = list_of_best_values
-    #
-    print(df)
+
     return df
 
 
-df = get_similarity_inPercent(cleint_name, db_name, collection_name)
-print(len(df))
+# df = get_stepone_df(cleint_name, db_name, collection_name)
+# print(len(df))
 
 
 def chunk_dataframe(df):
@@ -85,43 +82,34 @@ def chunk_dataframe(df):
 
     return chunked_dfs
 
-list_of_chunked_fds = chunk_dataframe(df)
+
+# list_of_chunked_fds = chunk_dataframe(df)
 
 
-dfs=[]
+def get_resultdf_original(list_of_chunked_fds):
+    df0 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+    df1 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+    df2 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+    df3 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+    df4 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+    df5 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+    df6 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+    df7 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+    df8 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
 
-df0 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
-df1 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
-df2 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
-df3 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
-df4 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
-df5 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
-df6 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
-df7 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
-df8 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+    dfs = [df0, df1, df2, df3, df4, df5, df6, df7, df8]
 
+    for i in list_of_chunked_fds:
+        m = 0
+        for index, row in i.iterrows():
+            dfs[m] = dfs[m]._append(row, ignore_index=True)
+            m += 1
+    return dfs
 
-
-
-dfs=[df0,df1,df2,df3,df4,df5,df6,df7,df8]
-#
-
-
-for i in list_of_chunked_fds:
-    m = 0
-    for index, row in i.iterrows():
-
-        # dft = pd.DataFrame(row)
-        dfs[m] = dfs[m]._append(row, ignore_index=True)
-        m += 1
-
-for i in dfs:
-    print(i)
-
+# dfs = get_resultdf_original(list_of_chunked_fds)
 def get_normalised_result(dfs):
-    normalised_dfs_list =[]
+    normalised_dfs_list = []
     for i in dfs:
-
         step_size = 100 / len(i)
         i = i.copy()
         i.loc[:, 'Nomalised_committe_size'] = np.arange(0, 100, step_size)[:len(i)]
@@ -132,7 +120,9 @@ def get_normalised_result(dfs):
         normalised_dfs_list.append(i)
 
     return normalised_dfs_list
-normorlised_dfs= get_normalised_result(dfs)
 
-for i in normorlised_dfs:
-    print(i)
+
+# normorlised_dfs = get_normalised_result(dfs)
+
+# for i in normorlised_dfs:
+#     print(i)
