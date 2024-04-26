@@ -8,10 +8,10 @@ pd.set_option('display.max_rows', None)  # Show all rows
 pd.set_option('display.max_columns', None)  # Show all columns
 pd.set_option('display.width', None)  # Auto-detect width
 
-# list_methods = ["avg_avg", "max_avg", "min_avg", "max_max", "min_min", "max_min", "min_max", "avg_min", "avg_max"]
-cleint_name = "mongodb://localhost:27017/"
-db_name = "Altruistic_result"
-collection_name = '00009-00000001_0.1'
+# # list_methods = ["avg_avg", "max_avg", "min_avg", "max_max", "min_min", "max_min", "min_max", "avg_min", "avg_max"]
+# cleint_name = "mongodb://localhost:27017/"
+# db_name = "Altruistic_result"
+# collection_name = '00009-00000001_0.1'
 def generate_rising_sums(n):
     return [sum(range(n, n - i, -1)) for i in range(n, 0, -1)]
 
