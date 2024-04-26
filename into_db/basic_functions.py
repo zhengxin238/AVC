@@ -3,7 +3,7 @@ from gurobipy import *
 import graphCode
 import prefLibParse
 
-# pd.set_option('display.max_columns', None)
+pd.set_option('display.max_columns', None)
 #
 # # =====================================================
 # # the input information
@@ -32,8 +32,8 @@ import prefLibParse
 
 # =====================================================f1
 
-
-
+#
+#
 # candidates = list(range(1, (
 #         prefLibParse.getNumberOfAlternatives(r"https://www.preflib.org/static/data/agh/00009-00000001.soc") + 1)))
 # voters = list(
@@ -72,6 +72,7 @@ def borda_score_df_func(candidates, voters, preference):
 
 
 # print(df_step1)
+# print(df_step1.sum(axis=0))
 # for index, voter in enumerate(voters):
 #     new_row_values = df_step1.iloc[index] * 0.5
 #     print(new_row_values)
@@ -89,10 +90,11 @@ def borda_score_altristic_func(friend_structure_list, borda_score_df, p):
         n += 1
     return altruistic_df
 
-# p=0.5
+# p=0.7
 # l = borda_score_altristic_func(friend_structure_list, df_step1, p)
-#
-# print(l)
+
+print(l)
+print(l.sum(axis=0))
 
 
 def getCoefficientMatrix(altruistic_df):

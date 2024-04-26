@@ -96,11 +96,12 @@ def final_plot_rising_altruism_9pics(database_name):
     k = 0
     for i in df_list:
         plot_code.plot_columns(i,list_methods[k])
+        plot_code.plot_row(i, list_methods[k])
         k += 1
 
 
 
-final_plot_rising_altruism_9pics("Dataset_9compares")
+final_plot_rising_altruism_9pics("DataSet_9compares")
 
 # ======================================================================
 # ======================================================================

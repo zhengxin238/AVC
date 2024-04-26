@@ -8,10 +8,10 @@ pd.set_option('display.max_rows', None)  # Show all rows
 pd.set_option('display.max_columns', None)  # Show all columns
 pd.set_option('display.width', None)  # Auto-detect width
 
-# # list_methods = ["avg_avg", "max_avg", "min_avg", "max_max", "min_min", "max_min", "min_max", "avg_min", "avg_max"]
-# cleint_name = "mongodb://localhost:27017/"
-# db_name = "Altruistic_result"
-# collection_name = '00009-00000001_0.1'
+# list_methods = ["avg_avg", "max_avg", "min_avg", "max_max", "min_min", "max_min", "min_max", "avg_min", "avg_max"]
+cleint_name = "mongodb://localhost:27017/"
+db_name = "Altruistic_result"
+collection_name = '00009-00000001_0.1'
 def generate_rising_sums(n):
     return [sum(range(n, n - i, -1)) for i in range(n, 0, -1)]
 
@@ -55,8 +55,8 @@ def get_stepone_df(cleint_name, db_name, collection_name):
     return df
 
 #
-# df = get_stepone_df(cleint_name, db_name, collection_name)
-# print(len(df))
+df = get_stepone_df(cleint_name, db_name, collection_name)
+print(len(df))
 
 
 def chunk_dataframe(df):
@@ -85,8 +85,10 @@ def chunk_dataframe(df):
     return chunked_dfs
 
 
-# list_of_chunked_fds = chunk_dataframe(df)
+list_of_chunked_fds = chunk_dataframe(df)
 
+for i in list_of_chunked_fds:
+    print(i)
 
 def get_resultdf_original(list_of_chunked_fds):
     df0 = pd.DataFrame(columns=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
@@ -108,7 +110,9 @@ def get_resultdf_original(list_of_chunked_fds):
             m += 1
     return dfs
 
-# dfs = get_resultdf_original(list_of_chunked_fds)
+dfs = get_resultdf_original(list_of_chunked_fds)
+for i in dfs:
+    print(i)
 def get_normalised_result(dfs):
     normalised_dfs_list = []
     for i in dfs:
@@ -120,19 +124,21 @@ def get_normalised_result(dfs):
         i = i.iloc[:, :-1]
         i.index.name = None
         normalised_dfs_list.append(i)
-
+    for i in normalised_dfs_list:
+        print(i)
     for i in normalised_dfs_list:
         sum_list = sorted(generate_rising_sums(len(i)))
 
         for index, divisor in enumerate(sum_list):
             i.iloc[index] = i.iloc[index] / divisor
+    for i in normalised_dfs_list:
+        print(i)
     return normalised_dfs_list
 
 
-# normorlised_dfs = get_normalised_result(dfs)
-#
-# for i in normorlised_dfs:
-#     print(i)
+normorlised_dfs = get_normalised_result(dfs)
+
+
 
 
 
